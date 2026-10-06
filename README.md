@@ -50,6 +50,7 @@ Options for `plot` (all optional):
 | `thickness` | per-series line width in dots |
 | `style` | per-series `"solid"` or `"dashed"` (one dot per character) |
 | `end_labels` | print series labels at the right-hand end of each line |
+| `end_values` | add each series' final value after its end label (`value_fmt`, default `"{:.4g}"`) |
 
 With colour on, each line has its own colour and cells shared by two lines
 are highlighted. Without colour, the second line is dashed (one dot per character) by

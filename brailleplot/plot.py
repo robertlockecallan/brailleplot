@@ -42,7 +42,7 @@ def _as_series(s):
 
 def plot(series, width=60, height=15, labels=None, colors=None, title=None,
          xlim=None, ylim=None, color=None, file=None, thickness=None,
-         style=None, end_labels=True):
+         style=None, end_labels=True, end_values=True, value_fmt="{:.4g}"):
     """Plot one or more line series and return the rendered string.
 
     ``series`` is a list where each item is either a sequence of y values or a
@@ -53,9 +53,9 @@ def plot(series, width=60, height=15, labels=None, colors=None, title=None,
     ``style`` is a per-series list of ``"solid"`` or ``"dashed"``; a dashed
     line has one dot per character cell. By default all lines are solid,
     except that without colour every second line is dashed so the lines stay
-    distinguishable. ``end_labels``
-    prints each series label just right of the plot, on the row where that
-    series ends.
+    distinguishable. ``end_labels`` prints each series label just right of
+    the plot, on the row where that series ends; with ``end_values`` the
+    series' last finite y value follows it, formatted with ``value_fmt``.
     """
     data = [_as_series(s) for s in series]
     if not data:
@@ -100,9 +100,10 @@ def plot(series, width=60, height=15, labels=None, colors=None, title=None,
         return px, py
 
     end_ys = []  # pixel y of each series' last finite point
+    end_vals = []  # y value of each series' last finite point
     for layer, (xs, ys) in enumerate(data):
         path = []  # pixels of the whole series, used for dashed lines
-        prev = None
+        prev = last = None
         for x, y in zip(xs, ys):
             if not (math.isfinite(x) and math.isfinite(y)):
                 prev = None
@@ -115,9 +116,11 @@ def plot(series, width=60, height=15, labels=None, colors=None, title=None,
             else:
                 canvas.line(*prev, *cur, layer, thickness[layer])
             prev = cur
+            last = (cur[1], y)
         if path:
             canvas.dotted(path, layer, thickness[layer])
-        end_ys.append(prev[1] if prev else None)
+        end_ys.append(last[0] if last else None)
+        end_vals.append(last[1] if last else None)
 
     layer_colors = {i: ANSI[c] for i, c in enumerate(colors)} if color else None
     overlap = ANSI[OVERLAP_COLOR] if color and len(data) > 1 else None
@@ -143,6 +146,8 @@ def plot(series, width=60, height=15, labels=None, colors=None, title=None,
             if r < 0:  # more labels than rows
                 continue
             text = labels[i]
+            if end_values:
+                text += " " + value_fmt.format(end_vals[i])
             if color:
                 text = ANSI[colors[i]] + text + RESET
             row_labels[r] = text
