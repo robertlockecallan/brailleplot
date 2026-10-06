@@ -98,7 +98,7 @@ def plot(series, width=60, height=15, labels=None, colors=None, title=None,
         py = round((ymax - y) / (ymax - ymin) * ph)
         return px, py
 
-    end_rows = []  # cell row where each series' last finite point lies
+    end_ys = []  # pixel y of each series' last finite point
     for layer, (xs, ys) in enumerate(data):
         path = []  # pixels of the whole series, used for dashed lines
         prev = None
@@ -116,8 +116,7 @@ def plot(series, width=60, height=15, labels=None, colors=None, title=None,
             prev = cur
         if path:
             canvas.dotted(path, layer, thickness[layer])
-        end_rows.append(min(max(prev[1] // 4, 0), height - 1)
-                        if prev else None)
+        end_ys.append(prev[1] if prev else None)
 
     layer_colors = {i: ANSI[c] for i, c in enumerate(colors)} if color else None
     overlap = ANSI[OVERLAP_COLOR] if color and len(data) > 1 else None
@@ -127,19 +126,25 @@ def plot(series, width=60, height=15, labels=None, colors=None, title=None,
                height - 1: _fmt(ymin)}
     lw = max(len(s) for s in ylabels.values())
 
-    # Line-end labels: one per row, moved to the nearest free row on collision.
+    # Line-end labels, one per row, kept in the same top-to-bottom order as
+    # the line ends; labels that share a row are pushed apart.
     row_labels = {}
     if end_labels:
-        for i, r in enumerate(end_rows):
-            if r is None:
+        order = sorted((y, i) for i, y in enumerate(end_ys) if y is not None)
+        rows = []
+        for y, _ in order:  # push down past the previous label
+            rows.append(max(min(max(y, 0) // 4, height - 1),
+                            rows[-1] + 1 if rows else 0))
+        for k in range(len(rows) - 1, -1, -1):  # pull back inside the plot
+            rows[k] = min(rows[k], height - 1 if k == len(rows) - 1
+                          else rows[k + 1] - 1)
+        for (_, i), r in zip(order, rows):
+            if r < 0:  # more labels than rows
                 continue
-            for off in sorted(range(-height, height + 1), key=abs):
-                if 0 <= r + off < height and r + off not in row_labels:
-                    text = labels[i]
-                    if color:
-                        text = ANSI[colors[i]] + text + RESET
-                    row_labels[r + off] = text
-                    break
+            text = labels[i]
+            if color:
+                text = ANSI[colors[i]] + text + RESET
+            row_labels[r] = text
 
     lines = []
     if title:
