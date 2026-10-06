@@ -49,11 +49,11 @@ def plot(series, width=60, height=15, labels=None, colors=None, title=None,
     ``(xs, ys)`` tuple. NaN/inf points break the line. ``width``/``height`` are
     the plot area size in character cells. ``color`` forces ANSI colour on or
     off; by default it is used when ``file`` (stdout) is a TTY.
-    ``thickness`` is a per-series list of line widths in dots. By default all
-    lines are 1 dot wide, except that without colour every second line is
-    drawn 2 dots wide so the lines stay distinguishable.
-    ``style`` is a per-series list of ``"solid"`` or ``"dashed"`` (default all
-    solid); a dashed line has one dot per character cell. ``end_labels``
+    ``thickness`` is a per-series list of line widths in dots (default 1).
+    ``style`` is a per-series list of ``"solid"`` or ``"dashed"``; a dashed
+    line has one dot per character cell. By default all lines are solid,
+    except that without colour every second line is dashed so the lines stay
+    distinguishable. ``end_labels``
     prints each series label just right of the plot, on the row where that
     series ends.
     """
@@ -82,11 +82,12 @@ def plot(series, width=60, height=15, labels=None, colors=None, title=None,
     if color is None:
         color = hasattr(file, "isatty") and file.isatty()
     if thickness is None:
-        thickness = [1 if color else 1 + i % 2 for i in range(len(data))]
+        thickness = [1] * len(data)
     if len(thickness) != len(data):
         raise ValueError("need one thickness per series")
     if style is None:
-        style = ["solid"] * len(data)
+        style = ["solid" if color or i % 2 == 0 else "dashed"
+                 for i in range(len(data))]
     if len(style) != len(data) or any(st not in STYLES for st in style):
         raise ValueError(f"need one style per series, each one of {STYLES}")
 

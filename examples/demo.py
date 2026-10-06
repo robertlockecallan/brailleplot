@@ -28,7 +28,7 @@ print(plot([(epochs, train), (val_epochs, val)], labels=["train", "val"],
            colors=["green", "red"]))
 print()
 
-# The same two lines told apart by dashing instead of colour or thickness.
+# The same two lines told apart by thickness instead of colour or dashing.
 print(plot_two(sin, damped, x=xs, labels=("sin(x)", "damped"),
-               title="Solid vs dashed", width=70, height=16,
-               color=False, thickness=[1, 1], style=["solid", "dashed"]))
+               title="Thin vs thick", width=70, height=16,
+               color=False, thickness=[1, 2], style=["solid", "solid"]))

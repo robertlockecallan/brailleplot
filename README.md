@@ -52,9 +52,9 @@ Options for `plot` (all optional):
 | `end_labels` | print series labels at the right-hand end of each line |
 
 With colour on, each line has its own colour and cells shared by two lines
-are highlighted. Without colour, the second line is drawn twice as thick by
-default so the lines remain distinguishable; `style=["solid", "dashed"]` is an
-alternative. NaN/inf values break a line.
+are highlighted. Without colour, the second line is dashed (one dot per character) by
+default so the lines remain distinguishable; `thickness=[1, 2]` with
+`style=["solid", "solid"]` gives a thin/thick pair instead. NaN/inf values break a line.
 
 ## Example
 
