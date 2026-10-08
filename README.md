@@ -62,3 +62,16 @@ default so the lines remain distinguishable; `thickness=[1, 2]` with
 ```
 python examples/demo.py
 ```
+
+### View MNIST digits
+
+```
+python examples/mnist_view.py                        # first 8 training images
+python examples/mnist_view.py 0 5 42 --split test    # specific indices
+python examples/mnist_view.py --label 7 --random --n 6
+python examples/mnist_view.py --npy samples.npy      # any (N, 28, 28) array
+```
+
+Reads the IDX files from `~/mnist` (override with `--dir`). On a TTY each digit
+is drawn in 256-colour grayscale using half blocks (28x14 cells); otherwise, or
+with `--no-color`, it falls back to an ASCII brightness ramp.
